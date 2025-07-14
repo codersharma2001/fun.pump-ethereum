@@ -6,12 +6,12 @@ import "@openzeppelin-contracts-5.0.2/token/ERC20/ERC20.sol";
 contract Token is ERC20 {
     address public admin;
 
-    constructor(string memory name, string memory ticker, uint initialMint) ERC20(name, ticker) {
+    constructor(string memory name, string memory ticker, uint256 initialMint) ERC20(name, ticker) {
         _mint(msg.sender, initialMint);
         admin = msg.sender;
     }
 
-    function mint(address to, uint amount) external {
+    function mint(address to, uint256 amount) external {
         require(msg.sender == admin, "only admin");
         _mint(to, amount);
     }

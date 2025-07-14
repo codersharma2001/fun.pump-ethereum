@@ -5,7 +5,6 @@ import {Test, console} from "forge-std/Test.sol";
 import {TokenFactory} from "../src/TokenFactory.sol";
 import {Token} from "../src/Token.sol";
 
-
 contract TokenFactoryTest is Test {
     TokenFactory public factory;
     address public user;
@@ -22,15 +21,15 @@ contract TokenFactoryTest is Test {
 
         assertEq(token.totalSupply(), factory.INITIAL_MINT());
         assertEq(token.balanceOf(address(factory)), factory.INITIAL_MINT());
-        assertEq(uint(factory.tokens(tokenAddr)), uint(TokenFactory.TokenState.ICO));
+        assertEq(uint256(factory.tokens(tokenAddr)), uint256(TokenFactory.TokenState.ICO));
     }
 
     function test_CalculateEthRequirementMonotonic() public {
         address tokenAddr = factory.createToken("MyToken", "MYT");
 
-        uint eth1 = factory.calculateRequiredEth(tokenAddr, 1 ether);
-        uint eth2 = factory.calculateRequiredEth(tokenAddr, 2 ether);
-        uint eth4 = factory.calculateRequiredEth(tokenAddr, 4 ether);
+        uint256 eth1 = factory.calculateRequiredEth(tokenAddr, 1 ether);
+        uint256 eth2 = factory.calculateRequiredEth(tokenAddr, 2 ether);
+        uint256 eth4 = factory.calculateRequiredEth(tokenAddr, 4 ether);
 
         assertGt(eth2, eth1);
         assertGt(eth4, eth2);
@@ -46,8 +45,8 @@ contract TokenFactoryTest is Test {
     function test_BuyTokenSuccess() public {
         address tokenAddr = factory.createToken("TestBuy", "TBY");
         Token token = Token(tokenAddr);
-        uint amount = 1 ether;
-        uint requiredETH = factory.calculateRequiredEth(tokenAddr, amount);
+        uint256 amount = 1 ether;
+        uint256 requiredETH = factory.calculateRequiredEth(tokenAddr, amount);
 
         vm.prank(user);
         factory.buy{value: requiredETH}(tokenAddr, amount);
@@ -76,27 +75,26 @@ contract TokenFactoryTest is Test {
         factory.withdraw(tokenAddr);
     }
 
-function test_FullFlowTriggerLiquidityAndWithdraw() public {
-    address tokenAddr = factory.createToken("PumpIt", "PI");
-    Token token = Token(tokenAddr);
+    function test_FullFlowTriggerLiquidityAndWithdraw() public {
+        address tokenAddr = factory.createToken("PumpIt", "PI");
+        Token token = Token(tokenAddr);
 
-    uint buyAmount = 1 ether; // Keep it small to avoid hitting FUNDING_GOAL
-    uint requiredETH = factory.calculateRequiredEth(tokenAddr, buyAmount);
+        uint256 buyAmount = 1 ether; // Keep it small to avoid hitting FUNDING_GOAL
+        uint256 requiredETH = factory.calculateRequiredEth(tokenAddr, buyAmount);
 
-    vm.prank(user);
-    factory.buy{value: requiredETH}(tokenAddr, buyAmount);
+        vm.prank(user);
+        factory.buy{value: requiredETH}(tokenAddr, buyAmount);
 
-    // ✅ Manually set token state to TRADING (tokens → slot 0)
-    bytes32 tokenSlot = keccak256(abi.encode(tokenAddr, uint256(0)));
-    vm.store(address(factory), tokenSlot, bytes32(uint256(TokenFactory.TokenState.TRADING)));
+        // ✅ Manually set token state to TRADING (tokens → slot 0)
+        bytes32 tokenSlot = keccak256(abi.encode(tokenAddr, uint256(0)));
+        vm.store(address(factory), tokenSlot, bytes32(uint256(TokenFactory.TokenState.TRADING)));
 
-    assertEq(factory.balances(tokenAddr, user), buyAmount);
+        assertEq(factory.balances(tokenAddr, user), buyAmount);
 
-    vm.prank(user);
-    factory.withdraw(tokenAddr);
+        vm.prank(user);
+        factory.withdraw(tokenAddr);
 
-    assertEq(token.balanceOf(user), buyAmount);
-    assertEq(factory.balances(tokenAddr, user), 0);
-}
-
+        assertEq(token.balanceOf(user), buyAmount);
+        assertEq(factory.balances(tokenAddr, user), 0);
+    }
 }

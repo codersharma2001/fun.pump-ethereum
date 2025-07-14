@@ -9,9 +9,12 @@ out/
 
 # Docs
 docs/
-
+lib
 
 # Dotenv file
 .env
-# Dependencies
-dependencies
+
+
+
+# Soldeer
+/dependencies

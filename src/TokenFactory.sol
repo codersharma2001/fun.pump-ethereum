@@ -2,9 +2,9 @@
 pragma solidity 0.8.26;
 
 import "./Token.sol";
-import "@uniswap-v2-core-1.0.1/contracts/interfaces/IUniswapV2Factory.sol";
-import "@uniswap-v2-periphery-1.1.0-beta.0/contracts/interfaces/IUniswapV2Router02.sol";
-import "@uniswap-v2-core-1.0.1/contracts/interfaces/IUniswapV2Pair.sol";
+ import "uniswap-v2-core/interfaces/IUniswapV2Factory.sol";
+ import "uniswap-v2-periphery/interfaces/IUniswapV2Router02.sol";
+ import "uniswap-v2-core/interfaces/IUniswapV2Pair.sol";
 
 contract TokenFactory {
     enum TokenState {
@@ -91,7 +91,7 @@ contract TokenFactory {
 
         token.approve(UNISWAP_V2_ROUTER, tokenAmount);
 
-        (uint256 _amountToken, uint256 _amountETH, uint256 liquidity) = router.addLiquidityETH{value: ethAmount}(
+        (, , uint256 liquidity) = router.addLiquidityETH{value: ethAmount}(
             tokenAddress, tokenAmount, tokenAmount, ethAmount, address(this), block.timestamp
         );
 
